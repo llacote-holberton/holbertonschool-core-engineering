@@ -5,9 +5,8 @@ def pow(a, b):
     total = 1
     op = 0
     while (op < abs(b)):
-        if (b > 0):
-            total *= a
-        else:
-            total /= a
+        total *= a
         op += 1
+    if (b < 0):
+        total = 1 / total
     return total
