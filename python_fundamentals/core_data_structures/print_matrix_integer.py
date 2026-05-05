@@ -2,8 +2,12 @@
 def print_matrix_integer(matrix=[[]]):
     i = 0
     while (i < len(matrix)):
-        for j in matrix[i]:
-            print("{:d}".format(j), end=' ')
+        # Only way I see to manage "bounded space print"
+        #   is to use index also in subarray
+        for j in range(len(matrix[i])):
+            if (j > 0):
+                print(' ', end='')
+            print("{:d}".format(matrix[i][j]), end='')
         print('')
         i += 1
 
