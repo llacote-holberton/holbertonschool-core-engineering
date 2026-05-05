@@ -22,7 +22,7 @@ def best_score(a_dictionary):
         # DOESN'T WORK AND USELESS
         # sorted_by_best = dict(sorted(a_dictionary.items()))
         # return sorted_by_best.pop(0)
-        return max(a_dictionary)
+        return max(a_dictionary, key=a_dictionary.get)
 # Goal: return the key with the biggest integer value.
 # You may assume that all values are integers.
 # If a_dictionary is None or empty, return None.
