@@ -5,7 +5,7 @@
 class Square:
     """Square class with parameterized size
        and basic maths methods like area"""
-    def __init__(self, size):
+    def __init__(self, size=0):
         # Check is integer or raise TypeError exception.
         # Check is >= 0 or raise a ValueError exception.
         if not (isinstance(size, int)):
