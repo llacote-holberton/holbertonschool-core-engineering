@@ -32,7 +32,7 @@ class Rectangle:
             raise TypeError(f"{name} must be an integer")
             return False
         elif value < 0:
-            raise ValueError(f"{name} must be >=0")
+            raise ValueError(f"{name} must be >= 0")
             return False
         else:
             return True
