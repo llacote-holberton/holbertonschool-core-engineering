@@ -4,7 +4,7 @@ def safe_print_list(my_list=[], x=0):
     printed_count = 0
     while (i < x):
         try:
-            print(my_list[i], end=" ")
+            print(my_list[i], end="")
             printed_count += 1
         # CANNOT HAPPEN with built-in types as they all implement a method
         #  __str__ which returns a "string representation" of the variable.
