@@ -79,7 +79,7 @@ class Square:
         )
 
     def my_print(self):
-        print(self)
+        print(self, end="")
     # OLD METHOD
     #    if self.size == 0:
     #        print("")
