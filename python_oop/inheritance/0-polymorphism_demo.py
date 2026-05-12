@@ -7,11 +7,14 @@ class Animal:
 
 # First child class
 class Dog(Animal):
-    pass
+    def speak(self):
+        return "Woof"
 
 # Second child class
 class Cat(Animal):
-    pass
+    def speak(self):
+        return "Meow"
+
 
 dog = Dog()
 cat = Cat()
