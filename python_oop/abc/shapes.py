@@ -41,8 +41,8 @@ class Circle(Shape):
 
     def __init__(self, radius):
         """Circle constructor"""
-        if (self.check_valid_dimension(radius, "radius")):
-            self.__radius = radius
+        if (isinstance(radius, int)):
+            self.__radius = abs(radius)
 
     def area(self):
         """Circle area is squared radius multiplied by Pi"""
