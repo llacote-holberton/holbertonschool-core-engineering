@@ -22,16 +22,6 @@ class Shape(ABC):
         """Method checking value is usable to define a shape"""
         return (isinstance(value, int) and value > 0)
 
-    def check_valid_dimension(self, value, name="dimension"):
-        if not (isinstance(value, int)):
-            raise TypeError(f"{name} must be an integer")
-            return False
-        elif value < 0:
-            raise ValueError(f"{name} must be >= 0")
-            return False
-        else:
-            return True
-
     # Message template used when is_positive_integer check has failed.
     msg = "Parameter {name} must be strictly positive integer."
 
@@ -43,6 +33,8 @@ class Circle(Shape):
         """Circle constructor"""
         if (isinstance(radius, int)):
             self.__radius = abs(radius)
+        else:
+            raise TypeError(self.msg.format(name="radius"))
 
     def area(self):
         """Circle area is squared radius multiplied by Pi"""
@@ -59,10 +51,12 @@ class Rectangle(Shape):
 
     def __init__(self, width, height):
         """Rectangle constructor"""
-        if (self.check_valid_dimension(width, "width")):
-            self.__width = width
-        if (self.check_valid_dimension(height, "height")):
-            self.__height = height
+        if not (isinstance(width, int)):
+            raise TypeError(self.msg.format(name="width"))
+        if not (isinstance(height, int)):
+            raise TypeError(self.msg.format(name="height"))
+        self.__width = abs(width)
+        self.__height = abs(height)
 
     def area(self):
         """Quadrilater area is multiplying width and height"""
