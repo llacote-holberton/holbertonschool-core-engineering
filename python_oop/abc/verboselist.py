@@ -35,7 +35,7 @@ class VerboseList(list):
             index = -1
         item = self[index]
         print(f"Popped [{item}] from the list.")
-        super().pop(index)
+        return super().pop(index)
 
 
 # Create a class named VerboseList that extends the Python list class.
