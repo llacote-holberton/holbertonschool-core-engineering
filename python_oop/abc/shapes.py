@@ -55,8 +55,8 @@ class Rectangle(Shape):
             raise TypeError(self.msg.format(name="width"))
         if not (isinstance(height, int)):
             raise TypeError(self.msg.format(name="height"))
-        self.__width = abs(width)
-        self.__height = abs(height)
+        self.__width = width
+        self.__height = height
 
     def area(self):
         """Quadrilater area is multiplying width and height"""
