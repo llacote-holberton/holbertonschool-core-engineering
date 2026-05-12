@@ -28,3 +28,11 @@ animals = [Dog(), Cat(), Dog()]
 
 for animal in animals:
     print(animal.speak())
+
+# Step 6
+dog = Dog()
+
+print(isinstance(dog, Dog))
+print(isinstance(dog, Animal))
+
+print(issubclass(Dog, Animal))
