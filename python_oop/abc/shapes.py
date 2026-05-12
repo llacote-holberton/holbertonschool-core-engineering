@@ -59,12 +59,10 @@ class Rectangle(Shape):
 
     def __init__(self, width, height):
         """Rectangle constructor"""
-        if not (self.is_positive_integer(width)):
-            raise TypeError(self.msg.format(name="width"))
-        elif not (self.is_positive_integer(height)):
-            raise TypeError(self.msg.format(name="height"))
-        self.__width = width
-        self.__height = height
+        if (self.check_valid_dimension(width, "width")):
+            self.__width = width
+        if (self.check_valid_dimension(height, "height")):
+            self.__height = height
 
     def area(self):
         """Quadrilater area is multiplying width and height"""
