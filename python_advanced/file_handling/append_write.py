@@ -7,14 +7,14 @@ def append_write(filename="", text=""):
 
     count__chars_to_write = len(text)
     count__chars_written = 0
-    print(f"@dev: text to print is {count__chars_to_write}")
+    # print(f"@dev: text to print is {count__chars_to_write}")
     # Using 'a' is like 'w' (automatic creation of file if not exist)
     #   only difference being text is added on new lines after existing content
     with open(filename, 'a', encoding="utf-8") as f:
-        print(f"@dev: file object attributes & methods: \n{dir(f)}")
+        # print(f"@dev: file object attributes & methods: \n{dir(f)}")
         try:
             count__chars_written = f.write(text)
-            print(f"@dev chars actually written: {count__chars_written}")
+            # print(f"@dev chars actually written: {count__chars_written}")
         except OSError as e:
             print(e)
     return count__chars_written
