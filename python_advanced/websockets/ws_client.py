@@ -26,16 +26,19 @@ async def connect_and_send(ws_server_url: str, msg_to_send: str):
 # Connect is a corouting function => needs async main
 async def main():
     """Server 'orchestrator', setups config and start server"""
-
     protocol = 'ws://'
     host = 'localhost'
     port = 8765
-    default_ws_server_url = protocol + host + ':' + str(port)
-    ws_server_url = os.environ.get("WS_URI", default_ws_server_url)
-    msg_to_send = "Hello WebSocket"
+    defaults__ws_server_url = protocol + host + ':' + str(port)
+    defaults__msg_to_send = "Hello WebSocket"
+
+    # YAY: two CUSTOM environment variables with NO INFO ON THEM IN Task!!!!
+    ws_server_url = os.environ.get("WS_URI", defaults__ws_server_url)
+    msg_to_send = os.environ.get("WS_MESSAGE", defaults__msg_to_send)
 
     echo_received = await connect_and_send(ws_server_url, msg_to_send)
     print(echo_received, end="")
+
 
 if __name__ == "__main__":
     # Remember: async function require being runned from
