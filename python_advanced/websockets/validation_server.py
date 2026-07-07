@@ -6,21 +6,25 @@
 import asyncio
 # Using the provided "websockets-based server" from websockets library.
 from websockets.asyncio.server import serve
+from websockets.exceptions import ConnectionClosed
 
 
 async def connection_handler(websocket):
     """Creates a websocket handler to send validation on message received"""
-    async for msg_received in websocket:
-        # Good practice to strim "empty spaces" around string to...
-        # 1. Facilitate comparison
-        # 2. Avoid differences from messages sent from different clients/OS
-        #    which may or not add new line.
-        # Also for this task it is explicitely required.
-        trimmed = msg_received.strip()
-        if isinstance(trimmed, str) and len(trimmed) > 0:
-            await websocket.send(f"OK: {trimmed}")
-        else:
-            await websocket.send("ERR:EMPTY")
+    # This is the right level for try/except to explicit that...
+    # "We try to discuss as long as connection is alive"
+    try:
+        while (True):
+            msg_received = await websocket.recv()
+            # Putting try/except at this level useless since connection closed
+            #   is destroyed so couldnd't "be repaired" on a later try.
+            trimmed = msg_received.strip()
+            if isinstance(trimmed, str) and len(trimmed) > 0:
+                await websocket.send(f"OK: {trimmed}")
+            else:
+                await websocket.send("ERR:EMPTY")
+    except ConnectionClosed as cc:
+        pass  # Nothing special required to do.
 
 
 # Serve is a corouting function, so needs "async" keyword,
@@ -37,7 +41,10 @@ async def main():
 if __name__ == "__main__":
     # Remember: async function require being runned from
     #   library provided function.
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt as ki:
+        pass
 
 # ========== INSTRUCTIONS =========
 # Improve the Websocket Webserver from task 0, update it to...
@@ -46,35 +53,49 @@ if __name__ == "__main__":
 # Is considered invalid "empty strings" post pre/post trimming.
 
 # ========== BRAINSTORM ==========
-# === Notes about the async with serve(...) as myserver syntax
-# with keyword ensures the server closes properly, once
-#   all instructions inside the block are executed.
-# Technically the with ... as x syntax is just calling
-#   the dunders __enter__ / __exit__ (or aenter/aexit for async variants)
-#   implemented by the object / expression written in ...
-# Serve is a function setting up a websocket server with a reference to
-#   a "handler function". Upon receiving a connection the server will
-#   automatically call the handler while creating on the fly the required
-#   "websocket" parameter object.
-# Second argument can be used to restrict the network interfaces on which
-#   to listen, "" = "listen everywhere". Third is machine port to use.
-# async with serve(connection_handler, "", port) as ws_server:
-#     # This specific instruction will prevent the server from
-#     #   closing "normally". Will need either explicit call to server.close
-#     #   or KeyboardInterrupt.
-#     await ws_server.serve_forever()
-# === Notes about the custom handler ===
-# print("Websocket attributes", dir(websocket))
-# @note: this is the way to handle a single request per connection
-# msg_received = await websocket.recv()
-# await websocket.send(msg_received)
-# The connection will be closed automatically afterwards so IF the client
-#   wants another "transaction" it would need to recreate a new connection.
-# Note: this works because Websocket object implements __aiter__ dunder
-#   to create an asynchronous generator which "yields" items.
+
+# === Notes about using the custom handler with try/except ===
+# Doing this
+# try:
+#     async for msg_received in websocket:
+#     ...
+# except ConnectionClosed as e:
+#     ...
+# Will NOT work because...
+# Internally the "for xxx" makes regular calls to websocket.recv()
+# When/IF the connection is closed, recv() raises the ConnectionClosed error
+# BUT it is silently catched by the iterator itself and "transformed" into
+#   a "normal end of iteration" aka StopAsyncIteration.
+# Making this...
 # async for msg_received in websocket:
-#     # @warning: we directly receives the message stream from how
-#     #   the generator was designed.
-#     # Keeping this line would override message n with the n+1.
-#     # msg_received = await websocket.recv()
-#     await websocket.send(msg_received)
+#     try:
+#         ...
+#     except:
+#         ...
+# Would only catch the exception if it happens during the send.
+# => ONLY WAY to properly catch the exception whether in receiption or sending
+#    is to NOT use the built-in iterator with for xxx in websocket syntax
+#    INSTEAD to define an explicitely infinite loop (while True) with
+#    EXPLICIT break cases.
+#    Benefit of that though is that we could define all related catchs
+#      in the same place (for example defining custom Exceptions for empty msg)
+
+# === Notes on trimming received message ===
+# Good practice to strim "empty spaces" around string to...
+# 1. Facilitate comparison
+# 2. Avoid differences from messages sent from different clients/OS
+#    which may or not add new line.
+# Also for this task it is explicitely required.
+
+# === Notes on handling Keyboard Interrupt SIGTERM signal ===
+# # Good (or required xd) practice to properly handle explicit extinctions
+# try:
+#     async with serve(connection_handler, "", port) as ws_server:
+#         await ws_server.serve_forever()
+# except KeyboardInterrupt as ki:
+#     pass
+# EXCEPT IT WOULDN'T WORK BECAUSE
+#   the KeyboardInterrupt would be received and handled by asyncio.run()
+#   which would first send an asyncio.CancelledError to main() to stop it
+#   then propagate the KeyboardInterrupt exception.
+# Hence why it MUST be catched "around the asyncio.run" level.
