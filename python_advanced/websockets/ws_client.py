@@ -5,6 +5,7 @@
 import asyncio
 # Using the provided "websockets-based connect" from websockets library.
 from websockets.asyncio.client import connect
+from websockets.exceptions import ConnectionClosed
 
 
 async def connect_and_send(ws_server_url: str, msg_to_send: str):
