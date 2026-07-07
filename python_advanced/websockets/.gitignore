@@ -1,2 +1,3 @@
 # Ignore Python env related file
 .python-version
+*.log
