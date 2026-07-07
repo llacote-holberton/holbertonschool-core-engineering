@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Simple websocket client."""
 
+# Required to integrate script with host's environment variables
+import os
 # Required to handle asynchronous tasks (imperative for websockets library)
 import asyncio
 # Using the provided "websockets-based connect" from websockets library.
@@ -28,8 +30,8 @@ async def main():
     protocol = 'ws://'
     host = 'localhost'
     port = 8765
-    ws_server_url = protocol + host + ':' + str(port)
-
+    default_ws_server_url = protocol + host + ':' + str(port)
+    ws_server_url = os.environ.get("WS_URI", default_ws_server_url)
     msg_to_send = "Hello WebSocket"
 
     echo_received = await connect_and_send(ws_server_url, msg_to_send)
