@@ -106,6 +106,15 @@ Accuracy in behavior is essential. Small deviations from the expected behavior m
 | 6. Browser Client                                    | index.html styles.css chat.js   |
 | 7. Quizz                                             | (quizz)                         |
 
+## Required libraries
+Tasks files will require Python3 in version 3.14+ to be installed, along with the following third-party libraries.
+- Websockets (https://websockets.readthedocs.io/en/stable/index.html)
+- Starlette (https://starlette.dev/) (which brings automatically 'anyio' and 'idna')
+- Uvicorn (https://uvicorn.dev/) (which brings automatically 'h11' and 'click')
+
+If you don't have them on your computer please first install Python with your system's package manager
+  then use its built-in [Package Installer for Python aka 'pip'](https://pip.pypa.io/en/stable/) like so: `pip install package_name`
+
 
 # Resources
 
