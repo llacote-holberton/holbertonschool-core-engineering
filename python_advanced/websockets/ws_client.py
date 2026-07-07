@@ -30,7 +30,7 @@ async def main():
     host = 'localhost'
     port = 8765
     defaults__ws_server_url = protocol + host + ':' + str(port)
-    defaults__msg_to_send = "Hello WebSocket"
+    defaults__msg_to_send = "demo"  # And not "WebSocket" apparently
 
     # YAY: two CUSTOM environment variables with NO INFO ON THEM IN Task!!!!
     ws_server_url = os.environ.get("WS_URI", defaults__ws_server_url)
