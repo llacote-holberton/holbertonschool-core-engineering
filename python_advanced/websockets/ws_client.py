@@ -35,7 +35,7 @@ async def main():
     msg_to_send = "Hello WebSocket"
 
     echo_received = await connect_and_send(ws_server_url, msg_to_send)
-    print(echo_received)
+    print(echo_received, end="")
 
 if __name__ == "__main__":
     # Remember: async function require being runned from
