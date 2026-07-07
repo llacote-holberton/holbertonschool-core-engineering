@@ -34,16 +34,12 @@ async def connection_handler(websocket):
     try:
         log.debug("New connection received!")
         CONNECTIONS_REGISTRY.add(websocket)
-        # Suboptimal approach because Python will do the replacement even if
-        #   the log technically shouldn't be display because wrong level'
         log.debug(debug_msg_tmpl, websocket, 'added', CONNECTIONS_REGISTRY)
         while (True):
             msg_received = await websocket.recv()
-            # Putting try/except at this level useless since connection closed
-            #   is destroyed so couldnd't "be repaired" on a later try.
             trimmed = msg_received.strip()
             if isinstance(trimmed, str) and len(trimmed) > 0:
-                await websocket.send(f"OK: {trimmed}")
+                await websocket.send(f"U:{msg_received}")
             else:
                 await websocket.send("ERR:EMPTY")
     except ConnectionClosed as cc:
