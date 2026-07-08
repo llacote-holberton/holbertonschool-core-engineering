@@ -95,23 +95,40 @@ async def shortlife_uvicorn_run():
     await server_task
 
 
+
+def sync_http_call(url):
+    """
+      Wrapper function for the blocking call into a synchronous function
+      not only for readability but moreso because no other choice.
+      Python accepts "anonymous functions" (lambda: xxx) but only a
+        single expression is allowed.
+      Yet our process requires multiple steps.
+      And the run_in_executor which can be used to delegate this task
+      to a sub-thread expects a function as parameter.
+    """
+    import urllib.request
+    with urllib.request.urlopen(url) as response:
+        return response.status, response.read().decode()
+
+
 async def healthcheck__http_route(path_from_root: str = '/'):
     # DEADLOCK WARNING: urllib is synchronous -> freezes shared main thread.
     # It blocks the event loop -> Uvicorn cannot process this very request.
-    import urllib.request
-    # Must admit too lazy to refactor everything just to avoid repeating
-    #   the infos for connecting to server. It's not like I am actually
-    #   building a real app. :)
+    # import urllib.request
     root_url = "http://127.0.0.1:8000"
     full_url = f"{root_url}{path_from_root}"
     log.debug("Full url to request to: %s", full_url)
 
     log.info("Starting Home HTTP endpoint check")
     try:
-        with urllib.request.urlopen(full_url) as response:
-            html_content = response.read().decode()
-            log.info(f"[TEST HTTP] Status: {response.status}")
-            log.info(f"Content: {html_content}")
+        loop = asyncio.get_running_loop()
+        status, html_content = await loop.run_in_executor(
+            None,            # Custom executor (None -> default behaviour)
+            sync_http_call,  # Function to execute in subthread
+            full_url              # Parameter(s) for the function, N params = N args
+        )
+        log.info(f"[TEST HTTP] Status: {status}")
+        log.info(f"Content: {html_content}")
     except Exception as e:
         log.error(f"[TEST HTTP] Failure: {e}")
 
