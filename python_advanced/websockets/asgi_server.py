@@ -114,9 +114,24 @@ async def healthcheck__http_route(path_from_root: str = '/'):
         log.error(f"[TEST HTTP] Failure: {e}")
 
 
-async def healthchecks():
-    import urllib.request
+async def healthcheck__websocket_route(endpoint: str = '/ws'):
     from websockets.asyncio.client import connect as ws_connect
+    log.info("Starting Basic Websocket endpoint check")
+    root_url = "ws://127.0.0.1:8000"
+
+    # Bad practice to have "implicit import made at parent level"
+    #   but acceptable here I just want something quick.
+    async with ws_connect(f"{root_url}{endpoint}") as client_mockup:
+        test_message = "This message should be echoed from server"
+        await client_mockup.send(test_message)
+        received_answer = await client_mockup.recv()
+        if received_answer == test_message:
+            log.info("Ws endpoints works")
+        else:
+            log.error("WS endpoint does not work as intended")
+
+
+async def healthchecks():
 
     print("Hello I'm in healthchecks")
     await healthcheck__http_route('/')
