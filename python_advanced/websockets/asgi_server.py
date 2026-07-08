@@ -27,6 +27,7 @@ logging.basicConfig(
 
 LIVE_CONNECTIONS = set()
 
+
 async def homepage(request):
     return HTMLResponse("<h1>WebSocket App</h1>")
 
@@ -36,7 +37,7 @@ async def websocket_endpoint(websocket):
     LIVE_CONNECTIONS.add(websocket)
 
     try:
-        while(True):
+        while (True):
             # Writing for websocket library but Starlette is DIFFERENT!
             # msg_received = await websocket.recv()
             # echo = await websocket.send(msg_received)
@@ -95,7 +96,6 @@ async def shortlife_uvicorn_run():
     await server_task
 
 
-
 def sync_http_call(url):
     """
       Wrapper function for the blocking call into a synchronous function
@@ -125,7 +125,7 @@ async def healthcheck__http_route(path_from_root: str = '/'):
         status, html_content = await loop.run_in_executor(
             None,            # Custom executor (None -> default behaviour)
             sync_http_call,  # Function to execute in subthread
-            full_url              # Parameter(s) for the function, N params = N args
+            full_url         # Parameter(s) for the function, N params = N args
         )
         log.info(f"[TEST HTTP] Status: {status}")
         log.info(f"Content: {html_content}")
