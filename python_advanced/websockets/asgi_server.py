@@ -96,6 +96,8 @@ async def shortlife_uvicorn_run():
 
 
 async def healthcheck__http_route(path_from_root: str = '/'):
+    # DEADLOCK WARNING: urllib is synchronous -> freezes shared main thread.
+    # It blocks the event loop -> Uvicorn cannot process this very request.
     import urllib.request
     # Must admit too lazy to refactor everything just to avoid repeating
     #   the infos for connecting to server. It's not like I am actually
