@@ -96,14 +96,17 @@ async def shortlife_uvicorn_run():
 
 
 async def healthcheck__http_route(path_from_root: str = '/'):
+    import urllib.request
     # Must admit too lazy to refactor everything just to avoid repeating
     #   the infos for connecting to server. It's not like I am actually
     #   building a real app. :)
-    root_url = "http://0.0.0.0:8000"
+    root_url = "http://127.0.0.1:8000"
+    full_url = f"{root_url}{path_from_root}"
+    log.debug("Full url to request to: %s", full_url)
 
     log.info("Starting Home HTTP endpoint check")
     try:
-        with urllib.request.urlopen(f"{root_url}{path_from_root}") as response:
+        with urllib.request.urlopen(full_url) as response:
             html_content = response.read().decode()
             log.info(f"[TEST HTTP] Status: {response.status}")
             log.info(f"Content: {html_content}")
