@@ -1,0 +1,114 @@
+#!/usr/bin/env python3
+
+# ===== APPLICATION related imports, using Starlette framework =====
+# Required to set up app, the "orchestrator class".
+from starlette.applications import Starlette
+# Picking one kind of response among a collection of implementations
+#   (PlainTextResponse, JSONResponse etc).
+from starlette.responses import HTMLResponse
+# Same concept, picking two implementations from a collection for routing.
+from starlette.routing import Route, WebSocketRoute
+
+
+# ===== SETTING UP LOGGING =====
+import logging
+import os
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+log = logging.getLogger('asgi_server')
+logging.basicConfig(
+    filename='asgi_server.log',
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s')
+
+
+# ===== DEFINING THE WEB APP with dual modes HTTP/Websocket =====
+
+async def homepage(request):
+    return HTMLResponse("<h1>WebSocket App</h1>")
+
+async def websocket_endpoint(websocket):
+    await websocket.accept()
+    # message loop here
+
+app = Starlette(routes=[
+    Route("/", homepage),
+    WebSocketRoute("/ws", websocket_endpoint),
+])
+
+
+# ===== DEFINING THE ASGI Server to allow self_test =====
+async def shortlife_uvicorn_run():
+    """Function spawning a uvicorn server for only 20 seconds"""
+    import uvicorn
+    # 1. Server config
+    server_lifespan = 20  # Seconds
+    host = "0.0.0.0"
+    port = 8000
+    log_level = "debug"
+
+    # uvicorn.run(app, port, log_level) CANNOT WORK for this use-case
+    #   because it is blocking (synchronous)
+    # We must explicitely use the "inner methods" of the framework.
+    config = uvicorn.Config(app, host=host, port=port, log_level=log_level)
+    # Creating the server (not "started" yet)
+    server = uvicorn.Server(config)
+    
+    # 2. Starting the "server listen" in a coroutine (non-blocking)
+    server_task = asyncio.create_task(server.serve())
+    
+    # 3. Waiting for lifespan duration in seconds
+    await asyncio.sleep(server_lifespan)
+    
+    # 4. Triggering "Graceful Shutdown" (to let existing connections close)
+    log.info("Automatic shutdown...")
+    server.should_exit = True
+    
+    # 5. Attente de la finalisation de la tâche
+    await server_task
+
+
+
+
+
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(shortlife_uvicorn_run())
+
+
+
+
+
+
+# ========== INSTRUCTIONS =========
+# Implement an application which...
+# Serves an HTML page at http://localhost:8000
+# AND exposes a Websocket endpoint at ws://localhost:8000/ws
+# * Accepting websocket connections on that endpoint to "echo"
+#   any message received back to the sender client, optionally
+#   keeping a list of connected clients in case of (why not).
+
+
+
+# ========== BRAINSTORM ==========
+# Uvicorn is the "orchestrator", the "interface exposed to the web".
+# It is tasked with receiving HTTP or Websocket requests, check if 
+#   there is an app suited to handle them, case arising propagating to them
+#   then pushing back the generated response to the client.
+
+# Starlette is a framework facilitating the creation of the apps
+#   in a way that respects logic and protocols expected by
+#   ASGI-compliant servers so you can just "plug and play" one in the other.
+# You define the urls it can answer to by creating and managing a List of
+#   Objects which all duck-type the Route related attributes and methods
+# Route class and subclasses are instanciated with at least two
+#     positional arguments: 'path' and 'handler'.
+# You can provide them at app creation by giving named argument 'routes'
+
+# === Notes on 'host' parameter ===
+# 127.0.0.1 is a "special IP" which is interpreted by programs as
+#   "only requests coming from the same machine" (the "local loopback").
+# 0.0.0.0   is a "special IP" which is interpreted by programs as
+#   "listen from everywhere" (every network interfaces)
+#   which will allow third-party even from internet to access it.
