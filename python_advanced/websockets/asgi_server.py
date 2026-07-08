@@ -152,7 +152,7 @@ async def healthcheck__websocket_route(endpoint: str = '/ws'):
 
 async def healthchecks():
 
-    print("Hello I'm in healthchecks")
+    log.info("Running basic healthchecks for HTTP and WS endpoints")
     await healthcheck__http_route('/')
     await healthcheck__websocket_route('/ws')
 
