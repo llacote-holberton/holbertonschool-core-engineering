@@ -138,9 +138,20 @@ async def healthchecks():
 
 
 async def app_self_contained_test():
-    shortlife_uvicorn_run()
+    # THIS cannot work because that call just creates a Coroutine but does
+    # NOT add it to the asynchronous execution task stack.
+    # shortlife_uvicorn_run()
+    # THIS would technically work but because we have "built-in timed life"
+    #   awaiting it would mean we "sleep" and "healthchecks" once the server
+    #   has already shut down.
+    # await shortlife_uvicorn_run()
+    # SO the ONLY WAY to have something working as intended is to
+    #   explicitely create an asynchronous task which will be started ASAP.
+    server_task = asyncio.create_task(shortlife_uvicorn_run())
     await asyncio.sleep(2)
     await healthchecks()
+    # And as usual we wait for the end of our server task to ensure clean end.
+    await server_task
 
 if __name__ == "__main__":
     import asyncio
