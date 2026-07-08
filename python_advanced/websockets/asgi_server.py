@@ -8,8 +8,9 @@ from starlette.applications import Starlette
 from starlette.responses import HTMLResponse
 # Same concept, picking two implementations from a collection for routing.
 from starlette.routing import Route, WebSocketRoute
-
-
+# Additional imports for websocket transactions handling
+# from websockets.exceptions import ConnectionClosed
+from starlette.websockets import WebSocketDisconnect
 # ===== SETTING UP LOGGING =====
 import logging
 import os
@@ -24,13 +25,32 @@ logging.basicConfig(
 
 # ===== DEFINING THE WEB APP with dual modes HTTP/Websocket =====
 
+LIVE_CONNECTIONS = set()
+
 async def homepage(request):
     return HTMLResponse("<h1>WebSocket App</h1>")
 
 
 async def websocket_endpoint(websocket):
     await websocket.accept()
-    # message loop here
+    LIVE_CONNECTIONS.add(websocket)
+
+    try:
+        while(True):
+            # Writing for websocket library but Starlette is DIFFERENT!
+            # msg_received = await websocket.recv()
+            # echo = await websocket.send(msg_received)
+            # from websockets.exceptions import ConnectionClosed
+            # except ConnectionClosed
+            msg_received = await websocket.receive_text()
+            echo = await websocket.send_text(msg_received)
+
+    except WebSocketDisconnect as ws_broken:
+        log.debug("Connection closed for websocket %s", websocket)
+    finally:
+        # Better put here conceptually than in except.
+        LIVE_CONNECTIONS.remove(websocket)
+
 
 app = Starlette(routes=[
     Route("/", homepage),
