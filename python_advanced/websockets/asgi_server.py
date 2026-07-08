@@ -27,6 +27,7 @@ logging.basicConfig(
 async def homepage(request):
     return HTMLResponse("<h1>WebSocket App</h1>")
 
+
 async def websocket_endpoint(websocket):
     await websocket.accept()
     # message loop here
@@ -59,18 +60,18 @@ async def shortlife_uvicorn_run():
     )
     # Creating the server (not "started" yet)
     server = uvicorn.Server(config)
-    
+
     # 2. Starting the "server listen" in a coroutine (non-blocking)
     server_task = asyncio.create_task(server.serve())
-    
+
     # 3. Waiting for lifespan duration in seconds
     await asyncio.sleep(server_lifespan)
-    
+
     # 4. Triggering "Graceful Shutdown" (to let existing connections close)
     log.info("Automatic shutdown...")
     server.should_exit = True
-    
-    # 5. Attente de la finalisation de la tâche
+
+    # 5. Awaiting end of that task to ensure everything cleaned properly.
     await server_task
 
 
@@ -95,11 +96,9 @@ if __name__ == "__main__":
 #   any message received back to the sender client, optionally
 #   keeping a list of connected clients in case of (why not).
 
-
-
 # ========== BRAINSTORM ==========
 # Uvicorn is the "orchestrator", the "interface exposed to the web".
-# It is tasked with receiving HTTP or Websocket requests, check if 
+# It is tasked with receiving HTTP or Websocket requests, check if
 #   there is an app suited to handle them, case arising propagating to them
 #   then pushing back the generated response to the client.
 
