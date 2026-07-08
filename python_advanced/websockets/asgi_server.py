@@ -50,7 +50,13 @@ async def shortlife_uvicorn_run():
     # uvicorn.run(app, port, log_level) CANNOT WORK for this use-case
     #   because it is blocking (synchronous)
     # We must explicitely use the "inner methods" of the framework.
-    config = uvicorn.Config(app, host=host, port=port, log_level=log_level)
+    config = uvicorn.Config(
+        app,
+        host=host,
+        port=port,
+        log_level=log_level,
+        log_config=None  # This deactivates internal log conf so will use mine
+    )
     # Creating the server (not "started" yet)
     server = uvicorn.Server(config)
     
