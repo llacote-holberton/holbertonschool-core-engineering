@@ -75,17 +75,38 @@ async def shortlife_uvicorn_run():
     await server_task
 
 
+async def healthcheck__http_route(path_from_root: str = '/'):
+    # Must admit too lazy to refactor everything just to avoid repeating
+    #   the infos for connecting to server. It's not like I am actually
+    #   building a real app. :)
+    root_url = "http://0.0.0.0:8000"
+
+    log.info("Starting Home HTTP endpoint check")
+    try:
+        with urllib.request.urlopen(f"{root_url}{path_from_root}") as response:
+            html_content = response.read().decode()
+            log.info(f"[TEST HTTP] Status: {response.status}")
+            log.info(f"Content: {html_content}")
+    except Exception as e:
+        log.error(f"[TEST HTTP] Failure: {e}")
 
 
+async def healthchecks():
+    import urllib.request
+    from websockets.asyncio.client import connect as ws_connect
 
+    print("Hello I'm in healthchecks")
+    await healthcheck__http_route('/')
+
+
+async def app_self_contained_test():
+    shortlife_uvicorn_run()
+    await asyncio.sleep(2)
+    await healthchecks()
 
 if __name__ == "__main__":
     import asyncio
-    asyncio.run(shortlife_uvicorn_run())
-
-
-
-
+    asyncio.run(app_self_contained_test())
 
 
 # ========== INSTRUCTIONS =========
