@@ -154,6 +154,7 @@ async def healthchecks():
 
     print("Hello I'm in healthchecks")
     await healthcheck__http_route('/')
+    await healthcheck__websocket_route('/ws')
 
 
 async def app_self_contained_test():
